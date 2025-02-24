@@ -11,7 +11,6 @@ File description:
 import numpy as np
 
 global WIDTH
-global SPACE
 
 
 def initialize_grid(seed, width):
@@ -20,9 +19,7 @@ def initialize_grid(seed, width):
     A randomly selected cell on the bottom row is the starting cluster.
     """
     global WIDTH
-    global SPACE
     WIDTH = width
-    SPACE = True
 
     # Set empty grid
     grid = np.zeros((width, width))
@@ -35,19 +32,15 @@ def initialize_grid(seed, width):
     return grid
 
 
-def add_walker(seed, grid):
+def add_walker(grid):
     """
     Adds a Random Walker to the grid on the top boundary.
     """
-    global SPACE
     empty_cells = np.where(grid[0] == 0)[0]
 
     if empty_cells.size > 0:
         random_col = np.random.choice(empty_cells)
         grid[0, random_col] = 2
-    else:
-        SPACE = False
-        raise ValueError("No new walkers can be added to the system!")
 
     return grid
 
@@ -87,15 +80,13 @@ def new_indexes(temp_grid, i, j):
             i_n -= 1
         else:
             temp_grid[i, j] = 0
-            if SPACE:
-                temp_grid = add_walker(temp_grid)
+            temp_grid = add_walker(temp_grid)
     if direction == "down":
         if i < WIDTH - 1:
             i_n += 1
         else:
             temp_grid[i, j] = 0
-            if SPACE:
-                temp_grid = add_walker(temp_grid)
+            temp_grid = add_walker(temp_grid)
     elif direction == "left":
         if j > 0:
             j_n -= 1
@@ -120,7 +111,6 @@ def update_grid(seed, grid):
     Updates locations for all the random walkers
     and checks wheter the cluster is in their neighbourhood.
     """
-    np.random.seed(seed)
     temp_grid = grid.copy()
 
     for i in range(WIDTH):
@@ -137,12 +127,20 @@ def update_grid(seed, grid):
                 else:
                     temp_grid[i_n, j_n] = 2
 
+    temp_grid = add_walker(temp_grid)
     grid[:] = temp_grid
     return grid
 
 
 def start_simulation(seed, steps, width):
+    """ Starts simulation with given parameter values. """
+    np.random.seed(seed)
     grid = initialize_grid(seed, width)
+    print(grid, "\n")
 
-    for _ in range(steps):
+    for i in range(steps):
+        print("step: ", i)
         grid = update_grid(seed, grid)
+        print(grid, "\n")
+    
+    return grid
