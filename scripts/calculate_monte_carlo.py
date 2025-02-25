@@ -17,4 +17,6 @@ width = 4
 seed = 123
 steps = 20
 
-grid = start_simulation(seed, steps, width)
+all_grids = start_simulation(seed, steps, width)
+
+# kan hier data saven

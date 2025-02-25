@@ -10,23 +10,22 @@ File description:
 
 import numpy as np
 
-global WIDTH
+global width
 
 
-def initialize_grid(seed, width):
+def initialize_grid(seed):
     """
     Initialize grid given a width as parameter. It assumes a square grid.
     A randomly selected cell on the bottom row is the starting cluster.
     """
-    global WIDTH
-    WIDTH = width
+
 
     # Set empty grid
-    grid = np.zeros((width, width))
+    grid = np.zeros((WIDTH, WIDTH))
 
     # Initialize the cluster
     np.random.seed(seed)
-    random_col = np.random.randint(0, width)
+    random_col = np.random.randint(0, WIDTH)
     grid[-1, random_col] = 1
 
     return grid
@@ -61,7 +60,7 @@ def check_neighbourhood(grid, i_n, j_n):
     return False
 
 
-def new_indexes(temp_grid, i, j):
+def new_indexes(temp_grid, grid, i, j):
     """
     Computes new indexes for random walker.
 
@@ -74,49 +73,62 @@ def new_indexes(temp_grid, i, j):
     """
     direction = np.random.choice(["up", "down", "left", "right"])
     i_n, j_n = i, j
+    removed = False
 
     if direction == "up":
         if i > 0:
             i_n -= 1
         else:
-            temp_grid[i, j] = 0
-            temp_grid = add_walker(temp_grid)
-    if direction == "down":
+            # temp_grid[i, j] = 0
+            # temp_grid = add_walker(temp_grid)
+            i_n -= 1
+            removed = True
+    elif direction == "down":
         if i < WIDTH - 1:
             i_n += 1
         else:
-            temp_grid[i, j] = 0
-            temp_grid = add_walker(temp_grid)
+            i_n += 1
+            removed = True
+            # temp_grid[i, j] = 0
+            # temp_grid = add_walker(temp_grid)
     elif direction == "left":
         if j > 0:
             j_n -= 1
         else:
-            j_n = WIDTH - 1
+            if grid[i_n, WIDTH - 1] != 1 and grid[i_n, WIDTH - 1] != 2: # Check the cell is unocupied
+                j_n = WIDTH - 1
     elif direction == "right":
         if j < WIDTH - 1:
             j_n += 1
         else:
-            j_n = 0
+            if grid[i_n, 0] != 1 and grid[i_n, 0] != 2: # Check the cell is unocupied
+                j_n = 0
 
     # Check if the new position is occupied by another walker
     if temp_grid[i_n, j_n] == 2:
         # Prevent the walker from moving into occupied cell
-        return temp_grid, i, j
+        return temp_grid, i, j, removed
 
-    return (temp_grid, i_n, j_n)
+    return (temp_grid, i_n, j_n, removed)
 
 
-def update_grid(seed, grid):
+def update_grid(grid):
     """
     Updates locations for all the random walkers
     and checks wheter the cluster is in their neighbourhood.
     """
     temp_grid = grid.copy()
+    walkers_removed = 0
 
     for i in range(WIDTH):
         for j in range(WIDTH):
             if grid[i, j] == 2:  # Check if the cel contains a walker
-                temp_grid, i_n, j_n = new_indexes(temp_grid, i, j)
+                temp_grid, i_n, j_n, removed = new_indexes(temp_grid, grid, i, j)
+
+                if removed:
+                    temp_grid[i, j] = 0
+                    walkers_removed += 1
+                    continue
                 cluster = check_neighbourhood(temp_grid, i_n, j_n)
 
                 temp_grid[i, j] = 0
@@ -127,6 +139,10 @@ def update_grid(seed, grid):
                 else:
                     temp_grid[i_n, j_n] = 2
 
+    # Add a new walker if any walker left the grid
+    for _ in range(walkers_removed):
+        temp_grid = add_walker(temp_grid)
+
     temp_grid = add_walker(temp_grid)
     grid[:] = temp_grid
     return grid
@@ -134,13 +150,17 @@ def update_grid(seed, grid):
 
 def start_simulation(seed, steps, width):
     """ Starts simulation with given parameter values. """
+    global WIDTH
+    WIDTH = width
     np.random.seed(seed)
-    grid = initialize_grid(seed, width)
+    grid = initialize_grid(seed)
+    all_grids = [grid.copy()]
     print(grid, "\n")
 
-    for i in range(steps):
-        print("step: ", i)
-        grid = update_grid(seed, grid)
+    for i in range(steps - 1):
+        print("step: ", i+1)
+        grid = update_grid(grid)
+        all_grids.append(grid.copy())
         print(grid, "\n")
     
-    return grid
+    return all_grids
