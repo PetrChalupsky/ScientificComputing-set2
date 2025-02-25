@@ -72,6 +72,7 @@ def new_indexes(temp_grid, grid, i, j):
         it reapears on the other side of the grid.
     """
     direction = np.random.choice(["up", "down", "left", "right"])
+
     i_n, j_n = i, j
     removed = False
 
@@ -105,7 +106,7 @@ def new_indexes(temp_grid, grid, i, j):
                 j_n = 0
 
     # Check if the new position is occupied by another walker
-    if temp_grid[i_n, j_n] == 2:
+    if removed == False and temp_grid[i_n, j_n] == 2:
         # Prevent the walker from moving into occupied cell
         return temp_grid, i, j, removed
 
@@ -155,12 +156,12 @@ def start_simulation(seed, steps, width):
     np.random.seed(seed)
     grid = initialize_grid(seed)
     all_grids = [grid.copy()]
-    print(grid, "\n")
+    # print(grid, "\n")
 
     for i in range(steps - 1):
-        print("step: ", i+1)
+        # print("step: ", i+1)
         grid = update_grid(grid)
         all_grids.append(grid.copy())
-        print(grid, "\n")
+        # print(grid, "\n")
     
     return all_grids
