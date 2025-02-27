@@ -106,10 +106,10 @@ def visualise_concentrations(t):
 
     axes[0].plot(time_steps, concentration_u1, label='$u$')
     axes[0].plot(time_steps, concentration_v1, label='$v$')
-    axes[1].plot(time_steps, concentration_u2, label='$u$')
-    axes[1].plot(time_steps, concentration_v2, label='$v$')
-    axes[2].plot(time_steps, concentration_u3, label='$u$')
-    axes[2].plot(time_steps, concentration_v3, label='$v$')
+    axes[1].plot(time_steps, concentration_u2)
+    axes[1].plot(time_steps, concentration_v2)
+    axes[2].plot(time_steps, concentration_u3)
+    axes[2].plot(time_steps, concentration_v3)
 
     axes[0].set_ylabel("Concentration", fontsize=18)
     axes[1].set_xlabel("$t$", fontsize=18)
@@ -118,7 +118,9 @@ def visualise_concentrations(t):
     axes[2].set_title("$f$=%1.3f," %f3 + "$k$=%1.3f" %k3, fontsize=18)
 
     for ax in axes:
-        ax.tick_params(axis="both", which="major", labelsize=16)    
+        ax.tick_params(axis="both", which="major", labelsize=16)  
+
+    fig.legend(fontsize=16, loc='upper left', bbox_to_anchor=(1, 1), borderaxespad=0.)  
 
     return fig
 
