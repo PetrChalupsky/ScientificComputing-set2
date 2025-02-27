@@ -4,6 +4,12 @@ import math
 import warnings
 import sys
 
+
+class ConcentrationZero(Exception):
+    pass
+
+
+
 @njit
 def initialize_grid(width, create_object):
     """
@@ -73,7 +79,7 @@ def sor_with_objects(width, eps, omega, objects, diffusion_grid):
         k = k + 1
 
 
-    return new_grid 
+    return k, new_grid 
 
 def determine_spread(width, eta, diffusion_grid, current_object):
     # Find possible positions
@@ -97,7 +103,7 @@ def determine_spread(width, eta, diffusion_grid, current_object):
         cum_concentration.append(tot_c)
     if tot_c == 0:
         print('The concentration in the grid is zero')
-        sys.exit()
+        raise ConcentrationZero()
 
     cum_concentration = np.array(cum_concentration)/tot_c
     p = np.random.rand()
@@ -112,14 +118,22 @@ def determine_spread(width, eta, diffusion_grid, current_object):
 
     return current_object
 
-def run_DLA(eta, omega, cluster):
+def search_omega_run_DLA(eta, omega, cluster):
     width = 100
     eps = 0.00001
     diffusion_grid = None
-    for _ in range(500):
-        diffusion_grid = sor_with_objects(width, eps, omega, cluster, diffusion_grid)
-        cluster = determine_spread(int(width),eta, diffusion_grid, cluster)
-    
+    k = 0
+    for i in range(500):
+        try:
+            k_temp, diffusion_grid = sor_with_objects(width, eps, omega, cluster, diffusion_grid)
+            cluster = determine_spread(int(width),eta, diffusion_grid, cluster)
+            k += k_temp 
+        except ConcentrationZero:
+            print(f'Exiting early at iteartion {i}')
+            return k
+
+
+
     cluster = np.array(cluster)
 
-    return diffusion_grid, cluster
+    return k

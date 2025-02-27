@@ -104,6 +104,7 @@ def parallel_sor_with_objects(width, eps, omega, objects, diffusion_grid):
         new_grid = diffusion_grid
     else:
         new_grid = initialize_grid(width, False)
+
      
     # Update grid while difference larger than epsilon
     delta = 100
@@ -118,11 +119,13 @@ def parallel_sor_with_objects(width, eps, omega, objects, diffusion_grid):
                 
             grid1 = future1.result()
             grid2 = future2.result()
-            new_grid = grid1 + grid2
-
-
-
-
+         
+        new_grid = grid1 + grid2
+        new_grid[0,:] = 0
+        new_grid[width-1,:] = 1
+        
+        
+        print(new_grid)
         delta = np.max(np.abs(new_grid - grid))
         delta_list.append(delta)
         k = k + 1
@@ -137,7 +140,7 @@ def determine_spread(width, eta, diffusion_grid, current_object):
     for i in range(width-2):
         for j in range(width-1):
             if current_object[i,j] == 0:
-                if current_object[i-1,j] == 1 or current_object[i+1,j] == 1 or current_object[i, j+1] or current_object[i, j-1] == 1:
+                if current_object[i-1,j] == 1 or current_object[i+1,j] == 1 or current_object[i, j+1] == 1 or current_object[i, j-1] == 1:
                     candidates.append((i,j))
    
     tot_c = 0
