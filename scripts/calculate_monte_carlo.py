@@ -15,9 +15,11 @@ from scientificcomputing_set2.monte_carlo import start_simulation
 
 width = 100
 seed = 123
-steps = 5000
+steps = 20000
 
-all_grids = start_simulation(seed, steps, width)
+simulations = np.zeros(5)
+for p in [0.2, 0.4, 0.6, 0.8, 1.0]:
+    all_grids = start_simulation(seed, steps, width, p = 1)
 
 # kan hier data saven
 np.save(f"data/monte_carlo", all_grids)
