@@ -17,9 +17,12 @@ width = 100
 seed = 123
 steps = 20000
 
-simulations = np.zeros(5)
-for p in [0.2, 0.4, 0.6, 0.8, 1.0]:
-    all_grids = start_simulation(seed, steps, width, p = 1)
+final_clusters = []
+simulations = []
+p_values = [0.2, 0.4, 0.6, 0.8, 1.0]
 
-# kan hier data saven
-np.save(f"data/monte_carlo", all_grids)
+for p in p_values:
+    print("p:", p)
+    all_grids = start_simulation(seed, steps, width, p)
+    np.save(f"data/monte_carlo_final_cluster_{p}", all_grids[-1].copy())
+    np.save(f"data/monte_carlo_all_grids_{p}", all_grids.copy())
