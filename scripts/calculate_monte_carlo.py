@@ -4,7 +4,7 @@ Names: Lisa Pijpers, Petr Chalupský and Tika van Bennekum
 Student IDs: 15746704, 15719227 and 13392425
 
 File description:
-    Runs time dependendent diffusion for couple selected time intervals.
+    Runs the Monte Carlo random walker simulation for different parameter values.
 """
 
 import numpy as np

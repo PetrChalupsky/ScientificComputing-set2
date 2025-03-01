@@ -21,7 +21,6 @@ def initialize_grid(seed):
     A randomly selected cell on the bottom row is the starting cluster.
     """
 
-
     # Set empty grid
     grid = np.zeros((WIDTH, WIDTH))
 
@@ -45,6 +44,7 @@ def add_walker(grid):
         grid[0, random_col] = 2
 
     return grid
+
 
 @njit
 def check_neighbourhood(grid, i_n, j_n):
@@ -75,13 +75,15 @@ def new_indexes(temp_grid, grid, i, j):
         Random walker goes left or right, if it goes out of bounds,
         it reapears on the other side of the grid.
     """
-    possible_directions = np.array([0, 1, 2, 3]) # 0:"up", 1:"down", 2:"left", 3:"right"
+    possible_directions = np.array(
+        [0, 1, 2, 3]
+    )  # 0:"up", 1:"down", 2:"left", 3:"right"
     direction = np.random.choice(possible_directions)
 
     i_n, j_n = i, j
     removed = False
 
-    if direction == 0: #up
+    if direction == 0:  # up
         if i > 0:
             i_n -= 1
         else:
@@ -89,7 +91,7 @@ def new_indexes(temp_grid, grid, i, j):
             # temp_grid = add_walker(temp_grid)
             i_n -= 1
             removed = True
-    elif direction == 1: #down
+    elif direction == 1:  # down
         if i < WIDTH - 1:
             i_n += 1
         else:
@@ -97,17 +99,19 @@ def new_indexes(temp_grid, grid, i, j):
             removed = True
             # temp_grid[i, j] = 0
             # temp_grid = add_walker(temp_grid)
-    elif direction == 2: #left
+    elif direction == 2:  # left
         if j > 0:
             j_n -= 1
         else:
-            if grid[i_n, WIDTH - 1] != 1 and grid[i_n, WIDTH - 1] != 2: # Check the cell is unocupied
+            if (
+                grid[i_n, WIDTH - 1] != 1 and grid[i_n, WIDTH - 1] != 2
+            ):  # Check the cell is unocupied
                 j_n = WIDTH - 1
-    elif direction == 3: #rigth
+    elif direction == 3:  # rigth
         if j < WIDTH - 1:
             j_n += 1
         else:
-            if grid[i_n, 0] != 1 and grid[i_n, 0] != 2: # Check the cell is unocupied
+            if grid[i_n, 0] != 1 and grid[i_n, 0] != 2:  # Check the cell is unocupied
                 j_n = 0
 
     # Check if the new position is occupied by another walker
@@ -157,7 +161,7 @@ def update_grid(grid, p):
 
 
 def start_simulation(seed, steps, width, p):
-    """ Starts simulation with given parameter values. """
+    """Starts simulation with given parameter values."""
     global WIDTH
     WIDTH = width
     np.random.seed(seed)
@@ -170,5 +174,5 @@ def start_simulation(seed, steps, width, p):
         grid = update_grid(grid, p)
         all_grids.append(grid.copy())
         # print(grid, "\n")
-    
+
     return all_grids
