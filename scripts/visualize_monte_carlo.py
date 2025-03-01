@@ -25,22 +25,21 @@ all_grids_3 = np.load(f"data/monte_carlo_all_grids_0.6.npy")
 all_grids_4 = np.load(f"data/monte_carlo_all_grids_0.8.npy")
 all_grids_5 = np.load(f"data/monte_carlo_all_grids_1.0.npy")
 
-final_clusters = [
-    final_cluster_1,
-    final_cluster_2,
-    final_cluster_3,
-    final_cluster_4,
-    final_cluster_5,
-]
 p_values = [0.2, 0.4, 0.6, 0.8, 1.0]
 
 
 def final_clusters():
+    final_clusters = [
+    final_cluster_1,
+    final_cluster_2,
+    final_cluster_3,
+    final_cluster_4,
+    final_cluster_5]
     # plot the final clusters for varying p values
     for i, elem in enumerate(final_clusters):
         cmap = ListedColormap(["black", "pink", "black"])
         plt.imshow(elem, cmap=cmap, interpolation="nearest")
-        plt.title(f"Monte Carlo final cluster, p={p_values[i]}")
+        plt.title(f"Monte Carlo final cluster, p_s={p_values[i]}", fontsize=18)
         plt.axis("off")
 
         # Add black border
@@ -70,9 +69,11 @@ def cluster_density_seperate():
 
         plt.figure(figsize=(8, 5))
         plt.plot(range(len(all_grids)), cluster_densities)
-        plt.xlabel("Time Step")
-        plt.ylabel("Cluster Density")
-        plt.title("Cluster Density Over Time")
+        plt.xlabel("Time step", fontsize=16)
+        plt.ylabel("Cluster density", fontsize=16)
+        plt.title("Cluster density over time", fontsize=18)
+        plt.xticks(fontsize=12)
+        plt.yticks(fontsize=12)
         plt.grid(True)
         plt.savefig(f"results/monte_carlo_over_time_{i}", dpi=300)
 
@@ -88,14 +89,18 @@ def cluster_density_together():
         ]
         plt.plot(range(len(all_grids)), cluster_densities, label=f"p = {p_values[i]}")
 
-    plt.xlabel("Time Step", fontsize=18)
-    plt.ylabel("Cluster Density", fontsize=18)
-    plt.title("Cluster Density Over Time for Different p Values")
-    plt.legend()
+    plt.xlabel("Time step", fontsize=18)
+    plt.ylabel("Cluster density", fontsize=16)
+    plt.title("Cluster density over time for various p Values", fontsize=16)
     plt.grid(True)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.legend(fontsize=12)
     plt.savefig(f"results/monte_carlo_over_time_all", dpi=300)
 
     plt.show()
 
 
-cluster_density_together()
+# cluster_density_together()
+final_clusters()
+cluster_density_seperate()
