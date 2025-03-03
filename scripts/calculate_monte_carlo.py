@@ -22,7 +22,6 @@ simulations = []
 p_values = [0.2, 0.4, 0.6, 0.8, 1.0]
 
 for p in p_values:
-    print("p:", p)
     all_grids = start_simulation(seed, steps, width, p)
     np.save(f"data/monte_carlo_final_cluster_{p}", all_grids[-1].copy())
     np.save(f"data/monte_carlo_all_grids_{p}", all_grids.copy())
