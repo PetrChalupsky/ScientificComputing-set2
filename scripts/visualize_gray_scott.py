@@ -201,8 +201,8 @@ def visualise_concentrations_noise(t):
 
 t = 5000
 
-fig1 = visualise_gray_scott(t)
-fig2 = visualise_gray_scott_noise(t)
+fig1 = visualise_gray_scott()
+fig2 = visualise_gray_scott_noise()
 
 fig1.savefig("results/gs_5000.png", dpi=300, bbox_inches="tight")
 fig2.savefig("results/gs_noise_5000.png", dpi=300, bbox_inches="tight")
