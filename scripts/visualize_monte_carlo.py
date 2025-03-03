@@ -30,16 +30,17 @@ p_values = [0.2, 0.4, 0.6, 0.8, 1.0]
 
 def final_clusters():
     final_clusters = [
-    final_cluster_1,
-    final_cluster_2,
-    final_cluster_3,
-    final_cluster_4,
-    final_cluster_5]
+        final_cluster_1,
+        final_cluster_2,
+        final_cluster_3,
+        final_cluster_4,
+        final_cluster_5,
+    ]
     # plot the final clusters for varying p values
     for i, elem in enumerate(final_clusters):
         cmap = ListedColormap(["black", "pink", "black"])
         plt.imshow(elem, cmap=cmap, interpolation="nearest")
-        #plt.title(f"Monte Carlo final cluster, $p_s$={p_values[i]}", fontsize=18)
+        # plt.title(f"Monte Carlo final cluster, $p_s$={p_values[i]}", fontsize=18)
         plt.axis("off")
 
         # Add black border
@@ -71,7 +72,7 @@ def cluster_density_seperate():
         plt.plot(range(len(all_grids)), cluster_densities)
         plt.xlabel("Time step", fontsize=16)
         plt.ylabel("Cluster density", fontsize=16)
-        #plt.title("Cluster density over time", fontsize=18)
+        # plt.title("Cluster density over time", fontsize=18)
         plt.xticks(fontsize=12)
         plt.yticks(fontsize=12)
         plt.grid(True)
@@ -86,11 +87,13 @@ def cluster_density_together():
         cluster_densities = [
             np.sum(grid == 1) / all_grids[0].size for grid in all_grids
         ]
-        plt.plot(range(len(all_grids)), cluster_densities, label=f"$p_s$ = {p_values[i]}")
+        plt.plot(
+            range(len(all_grids)), cluster_densities, label=f"$p_s$ = {p_values[i]}"
+        )
 
     plt.xlabel("Time step", fontsize=18)
     plt.ylabel("Cluster density", fontsize=16)
-    #plt.title("Cluster density over time for various $p_s$ values", fontsize=16)
+    # plt.title("Cluster density over time for various $p_s$ values", fontsize=16)
     plt.grid(True)
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)

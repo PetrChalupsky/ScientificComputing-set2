@@ -4,6 +4,7 @@ import math
 import warnings
 import sys
 
+
 @njit
 def initialize_grid(width, create_object):
     """
@@ -16,11 +17,10 @@ def initialize_grid(width, create_object):
     # Set upper and lower boundary conditions
     if create_object == True:
         return c
-    
+
     c[width - 1, :] = 1
 
     return c
-
 
 
 @njit
@@ -47,7 +47,7 @@ def sor_with_objects(width, eps, omega, objects, diffusion_grid):
         new_grid = diffusion_grid
     else:
         new_grid = initialize_grid(width, False)
-     
+
     # Update grid while difference larger than epsilon
     delta = 100
     delta_list = []
@@ -75,8 +75,7 @@ def sor_with_objects(width, eps, omega, objects, diffusion_grid):
         delta_list.append(delta)
         k = k + 1
 
-
-    return new_grid 
+    return new_grid
 
 
 def determine_spread(width, eta, diffusion_grid, current_object):
@@ -86,49 +85,55 @@ def determine_spread(width, eta, diffusion_grid, current_object):
     # Find possible positions
     candidates = []
     # minus 2 as we want to preserve initial source - discuss with Bartek
-    for i in range(width-2):
-        for j in range(width-1):
-            if current_object[i,j] == 0:
-                if current_object[i-1,j] == 1 or current_object[i+1,j] == 1 or current_object[i, j+1] == 1 or current_object[i, j-1] == 1:
-                    candidates.append((i,j))
-   
+    for i in range(width - 2):
+        for j in range(width - 1):
+            if current_object[i, j] == 0:
+                if (
+                    current_object[i - 1, j] == 1
+                    or current_object[i + 1, j] == 1
+                    or current_object[i, j + 1] == 1
+                    or current_object[i, j - 1] == 1
+                ):
+                    candidates.append((i, j))
+
     tot_c = 0
     cum_concentration = []
     for index in candidates:
         with warnings.catch_warnings():
-            warnings.filterwarnings('ignore', category=RuntimeWarning)
-            concentration_candidate = np.float64(diffusion_grid[index[0],index[1]])**eta
+            warnings.filterwarnings("ignore", category=RuntimeWarning)
+            concentration_candidate = (
+                np.float64(diffusion_grid[index[0], index[1]]) ** eta
+            )
         if math.isnan(concentration_candidate):
             concentration_candidate = 0
         tot_c += concentration_candidate
         cum_concentration.append(tot_c)
     if tot_c == 0:
-        print('The concentration in the grid is zero')
+        print("The concentration in the grid is zero")
         sys.exit()
 
-    cum_concentration = np.array(cum_concentration)/tot_c
+    cum_concentration = np.array(cum_concentration) / tot_c
     p = np.random.rand()
     for i, concentration in enumerate(cum_concentration):
         if p < concentration:
             chosen_index = candidates[i]
             break
 
-    
-
     current_object[chosen_index[0], chosen_index[1]] = 1
 
     return current_object
 
+
 def run_DLA(width, eta, omega, cluster):
     """
-    Run simple DLA. 
+    Run simple DLA.
     """
     eps = 0.00001
     diffusion_grid = None
     for _ in range(500):
         diffusion_grid = sor_with_objects(width, eps, omega, cluster, diffusion_grid)
-        cluster = determine_spread(int(width),eta, diffusion_grid, cluster)
-    
+        cluster = determine_spread(int(width), eta, diffusion_grid, cluster)
+
     cluster = np.array(cluster)
 
     return diffusion_grid, cluster
