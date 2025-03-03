@@ -136,4 +136,4 @@ def search_omega_run_DLA(eta, omega, cluster):
 
     cluster = np.array(cluster)
 
-    return k
+    return int(k)

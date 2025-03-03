@@ -1,3 +1,11 @@
+"""
+Course: Scientific computing
+Names: Lisa Pijpers, Petr Chalupský and Tika van Bennekum
+Student IDs: 15746704, 15719227 and 13392425
+
+File description:
+    Measures amount time it takes to run a simulation given different implementations.
+"""
 from scientificcomputing_set2.DLA_Laplace import create_objects, run_DLA 
 from scientificcomputing_set2.parallel_DLA_Laplace import run_cuda_DLA, run_parallel_cpu_DLA 
 import numpy as np

@@ -25,6 +25,9 @@ def initialize_grid(width, create_object):
 
 @njit
 def create_objects(list_objects, width):
+    """
+    Create an object (sink) on a grid.
+    """
     objects_grid = initialize_grid(width, True)
     for objects in list_objects:
         row_start, row_end, column_start, column_end = objects
@@ -35,8 +38,8 @@ def create_objects(list_objects, width):
 @njit
 def sor_with_objects(width, eps, omega, objects, diffusion_grid):
     """
-    Given the input makes an initial grid and updates this
-    for a given time. Returns final grid.
+    Given the input makes an initial grid and updates it
+    for a given time. Returns the final grid.
     """
 
     # Initialize the grid
@@ -77,6 +80,9 @@ def sor_with_objects(width, eps, omega, objects, diffusion_grid):
 
 
 def determine_spread(width, eta, diffusion_grid, current_object):
+    """
+    Determine the next cell where the cluster will grow and return the cluster.
+    """
     # Find possible positions
     candidates = []
     # minus 2 as we want to preserve initial source - discuss with Bartek
@@ -114,6 +120,9 @@ def determine_spread(width, eta, diffusion_grid, current_object):
     return current_object
 
 def run_DLA(width, eta, omega, cluster):
+    """
+    Run simple DLA. 
+    """
     eps = 0.00001
     diffusion_grid = None
     for _ in range(500):

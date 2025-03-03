@@ -1,3 +1,11 @@
+"""
+Course: Scientific computing
+Names: Lisa Pijpers, Petr Chalupský and Tika van Bennekum
+Student IDs: 15746704, 15719227 and 13392425
+
+File description:
+    Runs the diffusion-limited aggregation simulation for different parameter values.
+"""
 from scientificcomputing_set2.DLA_Laplace import create_objects, run_DLA 
 import numpy as np
 
