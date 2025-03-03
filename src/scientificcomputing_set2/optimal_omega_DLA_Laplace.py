@@ -2,10 +2,53 @@ import numpy as np
 from numba import njit
 import math
 import warnings
-from scientificcomputing_set2.DLA_Laplace import sor_with_objects
+from scientificcomputing_set2.DLA_Laplace import initialize_grid 
 
 class ConcentrationZero(Exception):
     pass
+
+@njit
+def sor_with_objects(width, eps, omega, objects, diffusion_grid):
+    """
+    Given the input makes an initial grid and updates it
+    for a given time. Returns the final grid.
+    """
+
+    # Initialize the grid
+    if diffusion_grid != None:
+        new_grid = diffusion_grid
+    else:
+        new_grid = initialize_grid(width, False)
+     
+    # Update grid while difference larger than epsilon
+    delta = 100
+    delta_list = []
+    k = 0
+    while delta >= eps and k < 10000:
+        grid = new_grid.copy()
+        for i in range(1, width - 1):
+            for j in range(width):
+                if objects[i, j] == 1:
+                    new_grid[i, j] = 0
+                else:
+                    new_grid[i, j] = (
+                        0.25
+                        * omega
+                        * (
+                            new_grid[(i + 1) % (width), j]
+                            + new_grid[(i - 1) % (width), j]
+                            + new_grid[i, (j - 1) % (width)]
+                            + new_grid[i, (j + 1) % (width)]
+                        )
+                        + (1 - omega) * new_grid[i, j]
+                    )
+
+        delta = np.max(np.abs(new_grid - grid))
+        delta_list.append(delta)
+        k = k + 1
+
+
+    return k, new_grid 
 
 
 def determine_spread_search_omega(width, eta, diffusion_grid, current_object):
