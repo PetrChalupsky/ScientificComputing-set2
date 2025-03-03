@@ -62,11 +62,8 @@ if __name__ == "__main__":
             )
             print(f"Repeat {i+1} for eta={eta}: {num_iterations_repeat[i]}")
 
-        print(f"All repeats for eta={eta}:")
-        print(num_iterations_repeat)
 
         num_iterations_repeat = np.array(num_iterations_repeat)
-        print(num_iterations_repeat)
 
         average = np.mean(num_iterations_repeat, axis=0)
         std = np.std(num_iterations_repeat, axis=0, ddof=1)

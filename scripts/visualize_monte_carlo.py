@@ -100,7 +100,6 @@ def cluster_density_together():
     plt.legend(fontsize=16)
     plt.savefig(f"results/monte_carlo_over_time_all", dpi=300)
 
-    plt.show()
 
 
 cluster_density_together()
