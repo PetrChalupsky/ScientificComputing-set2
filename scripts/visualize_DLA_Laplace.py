@@ -7,7 +7,7 @@ diffusion = []
 eta_list = [0.2, 1, 1.5]
 
 fig2, axes = plt.subplots(2, 3, figsize=(10, 6), sharey=True, sharex=True, layout='constrained')
-plt.subplots_adjust(wspace=-0.01, hspace=0.1)
+#plt.subplots_adjust(wspace=-0.01, hspace=0.1)
 #plt.xticks(fontsize=16)
 #plt.yticks(fontsize=16)
 for eta in eta_list: 

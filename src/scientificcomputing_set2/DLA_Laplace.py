@@ -75,6 +75,7 @@ def sor_with_objects(width, eps, omega, objects, diffusion_grid):
 
     return new_grid 
 
+
 def determine_spread(width, eta, diffusion_grid, current_object):
     # Find possible positions
     candidates = []
@@ -112,8 +113,7 @@ def determine_spread(width, eta, diffusion_grid, current_object):
 
     return current_object
 
-def run_DLA(eta, omega, cluster):
-    width = 100
+def run_DLA(width, eta, omega, cluster):
     eps = 0.00001
     diffusion_grid = None
     for _ in range(500):

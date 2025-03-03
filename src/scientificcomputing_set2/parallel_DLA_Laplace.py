@@ -1,9 +1,10 @@
 import numpy as np
-from numba import njit
+from numba import njit, cuda, prange 
 import math
 import warnings
 import sys
 from concurrent.futures import ProcessPoolExecutor
+
 @njit
 def initialize_grid(width, create_object):
     """
@@ -31,69 +32,56 @@ def create_objects(list_objects, width):
         objects_grid[row_start:row_end, column_start:column_end] = 1
     return objects_grid
 
-def loop_red(width, new_grid, objects, omega):
-        for i in range(1, width - 1):
-            for j in range(0,width,2):
-                if objects[i, j] == 1:
-                    new_grid[i, j] = 0
-                else:
-                    new_grid[i, j] = (
-                        0.25
-                        * omega
-                        * (
-                            new_grid[(i + 1) % (width), j]
-                            + new_grid[(i - 1) % (width), j]
-                            + new_grid[i, (j - 1) % (width)]
-                            + new_grid[i, (j + 1) % (width)]
-                        )
-                        + (1 - omega) * new_grid[i, j]
+@cuda.jit
+def update_red_cells(width, d_grid, d_new_grid, d_objects, omega):
+    
+
+    i, j = cuda.grid(2)
+    if i > 0 and i < width - 1 and j > 0 and j < width-1: 
+                
+        if (i + j) % 2 == 0:
+            if d_objects is not None and d_objects[i,j] == 1: 
+                d_new_grid[i, j] = 0
+            else:
+                d_new_grid[i, j] = (
+                    0.25
+                    * omega
+                    * (
+                        d_grid[(i + 1) % (width), j]
+                        + d_grid[(i - 1) % (width), j]
+                        + d_grid[i, (j - 1) % (width)]
+                        + d_grid[i, (j + 1) % (width)]
                     )
+                    + (1 - omega) * d_grid[i, j]
+                )
+@cuda.jit
+def update_black_cells(width, d_grid, d_new_grid, d_objects, omega):
+    
 
-        return new_grid
-
-def loop_black(width,new_grid, objects, omega):
-        for i in range(1, width - 1):
-            for j in range(1, width, 2):
-                if objects[i, j] == 1:
-                    new_grid[i, j] = 0
-                else:
-                    new_grid[i, j] = (
-                        0.25
-                        * omega
-                        * (
-                            new_grid[(i + 1) % (width), j]
-                            + new_grid[(i - 1) % (width), j]
-                            + new_grid[i, (j - 1) % (width)]
-                            + new_grid[i, (j + 1) % (width)]
-                        )
-                        + (1 - omega) * new_grid[i, j]
+    i, j = cuda.grid(2)
+    if i > 0 and i < width - 1 and j > 0 and j < width-1: 
+                
+        if (i + j) % 2 == 1:
+            if d_objects is not None and d_objects[i,j] == 1: 
+                d_new_grid[i, j] = 0
+            else:
+                d_new_grid[i, j] = (
+                    0.25
+                    * omega
+                    * (
+                        d_grid[(i + 1) % (width), j]
+                        + d_grid[(i - 1) % (width), j]
+                        + d_grid[i, (j - 1) % (width)]
+                        + d_grid[i, (j + 1) % (width)]
                     )
-        return new_grid
+                    + (1 - omega) * d_grid[i, j]
+                )
+             
 
-def test_loop_red(width, new_grid, objects, omega):
-        for i in range(1, width - 1):
-            for j in range(0,width,2):
-                    new_grid[i, j] = 1
-        return new_grid
 
-def test_loop_black(width,new_grid, objects, omega):
-        for i in range(1, width - 1):
-            for j in range(1, width, 2):
-                    new_grid[i, j] = 0.5
 
-        return new_grid
 
-def test_parralelize():
-    new_grid = initialize_grid(100, True)
-    with ProcessPoolExecutor(max_workers=2) as executor:
-        future1 = executor.submit(test_loop_red, 100,new_grid, None, 1.7) 
-        future2 = executor.submit(test_loop_black, 100,new_grid, None, 1.7)
-
-        combined_grid = future1.result() + future2.result()
-        np.set_printoptions(threshold=np.inf)
-        print(combined_grid)
-
-def parallel_sor_with_objects(width, eps, omega, objects, diffusion_grid):
+def sor_with_objects_cuda(width, eps, omega, objects, diffusion_grid):
     """
     Given the input makes an initial grid and updates this
     for a given time. Returns final grid.
@@ -105,33 +93,53 @@ def parallel_sor_with_objects(width, eps, omega, objects, diffusion_grid):
     else:
         new_grid = initialize_grid(width, False)
 
-     
+    
+
+    d_grid = cuda.to_device(new_grid)
+    d_new_grid = cuda.to_device(new_grid)
+    
+    d_objects = None
+    if objects is not None:
+        d_objects = cuda.to_device(objects)
+
+
+    threads_per_block = (16,16)
+    blocks_per_grid_x = (width + threads_per_block[0] - 1) // threads_per_block[0]
+    blocks_per_grid_y = (width + threads_per_block[1] - 1) // threads_per_block[1]
+    blocks_per_grid = (blocks_per_grid_x, blocks_per_grid_y)
     # Update grid while difference larger than epsilon
     delta = 100
     delta_list = []
     k = 0
-    while delta >= eps and k < 10000:
-        grid = new_grid.copy()
 
-        with ProcessPoolExecutor(max_workers=2) as executor:
-            future1 = executor.submit(loop_red, width,new_grid.copy(), objects, omega) 
-            future2 = executor.submit(loop_black, width, new_grid.copy(), objects, omega)
-                
-            grid1 = future1.result()
-            grid2 = future2.result()
-         
-        new_grid = grid1 + grid2
+    while delta >= eps and k < 10000:
+        d_old_grid = cuda.to_device(d_new_grid.copy_to_host())
+        
+        update_black_cells[blocks_per_grid, threads_per_block](width, d_new_grid, d_new_grid, d_objects, omega)
+        
+        cuda.synchronize()
+
+
+        temp_grid = d_new_grid.copy_to_host()
+        temp_grid[0,:] = 0
+        temp_grid[width-1,:] = 1
+        d_new_grid = cuda.to_device(temp_grid)
+
+        update_red_cells[blocks_per_grid, threads_per_block](width, d_new_grid, d_new_grid, d_objects, omega)
+        new_grid = d_new_grid.copy_to_host() 
         new_grid[0,:] = 0
         new_grid[width-1,:] = 1
+        d_new_grid = cuda.to_device(new_grid)
+
+        old_grid = d_old_grid.copy_to_host()
+
         
-        
-        print(new_grid)
-        delta = np.max(np.abs(new_grid - grid))
+        delta = np.max(np.abs(new_grid - old_grid))
         delta_list.append(delta)
         k = k + 1
 
 
-    return new_grid 
+    return d_new_grid.copy_to_host() 
 
 def determine_spread(width, eta, diffusion_grid, current_object):
     # Find possible positions
@@ -170,12 +178,108 @@ def determine_spread(width, eta, diffusion_grid, current_object):
 
     return current_object
 
-def run_parallel_DLA(eta, omega, cluster):
-    width = 100
+
+
+
+@njit(parallel=True)
+def update_black_cells_parallel_cpu(width, grid, new_grid, objects, omega):
+    for i in prange(1, width-1):
+        for j in range(1, width-1):
+            if (i + j) % 2 == 1:
+                
+                if objects is not None and objects[i,j] == 1: 
+                    new_grid[i, j] = 0
+                else:
+                    new_grid[i, j] = (
+                        0.25
+                        * omega
+                        * (
+                            grid[(i + 1), j]
+                            + grid[(i - 1), j]
+                            + grid[i, (j - 1)]
+                            + grid[i, (j + 1)]
+                        )
+                        + (1 - omega) * grid[i, j]
+                    )
+    return new_grid
+
+@njit(parallel=True)
+def update_red_cells_parallel_cpu(width, grid, new_grid, objects, omega):
+    for i in prange(1, width-1):
+        for j in range(1, width-1):
+            if (i + j) % 2 == 0:
+                
+                if objects is not None and objects[i,j] == 1: 
+                    new_grid[i, j] = 0
+                else:
+                    new_grid[i, j] = (
+                        0.25
+                        * omega
+                        * (
+                            grid[(i + 1), j]
+                            + grid[(i - 1), j]
+                            + grid[i, (j - 1)]
+                            + grid[i, (j + 1)]
+                        )
+                        + (1 - omega) * grid[i, j]
+                    )
+    return new_grid
+
+
+def sor_with_objects_parallel_cpu(width, eps, omega, objects, diffusion_grid):
+    """
+    SOR implementation using Numba for CPU parallelization
+    """
+    # Initialize the grid
+    if diffusion_grid is not None:
+        new_grid = diffusion_grid.copy()
+    else:
+        new_grid = initialize_grid(width, False)
+    
+    # Iteration loop
+    delta = 100
+    delta_list = []
+    k = 0
+    
+    while delta >= eps and k < 10000:
+        grid = new_grid.copy()
+        
+        # Update black cells
+        new_grid = update_black_cells_parallel_cpu(width, grid, new_grid.copy(), objects, omega)
+        
+        # Update red cells using the updated grid with new black values
+        new_grid = update_red_cells_parallel_cpu(width, new_grid, new_grid.copy(), objects, omega)
+        
+        # Set boundary conditions
+        new_grid[0, :] = 0
+        new_grid[width-1, :] = 1
+        
+        delta = np.max(np.abs(new_grid - grid))
+        delta_list.append(delta)
+        k += 1
+    
+    return new_grid
+
+
+
+
+
+def run_cuda_DLA(width, eta, omega, cluster):
     eps = 0.00001
     diffusion_grid = None
     for _ in range(500):
-        diffusion_grid = parallel_sor_with_objects(width, eps, omega, cluster, diffusion_grid)
+        diffusion_grid = sor_with_objects_cuda(width, eps, omega, cluster, diffusion_grid)
+        cluster = determine_spread(int(width),eta, diffusion_grid, cluster)
+    
+    cluster = np.array(cluster)
+
+    return diffusion_grid, cluster
+
+def run_parallel_cpu_DLA(width, eta, omega, cluster):
+    eps = 0.00001
+    diffusion_grid = None
+    for _ in range(500):
+        diffusion_grid = sor_with_objects_parallel_cpu(width, eps, omega, cluster, diffusion_grid)
         cluster = determine_spread(int(width),eta, diffusion_grid, cluster)
     
     cluster = np.array(cluster)
