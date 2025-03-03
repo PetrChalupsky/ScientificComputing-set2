@@ -11,7 +11,7 @@ File description:
 import numpy as np
 import matplotlib.pyplot as plt
 
-def visualise_gray_scott(t):
+def visualise_gray_scott():
     """
     Visualises final concentration of u for three sets of parameters. 
     """
@@ -32,20 +32,19 @@ def visualise_gray_scott(t):
     cbar = fig.colorbar(im0, ax=axes[:], fraction=0.02, pad=0.01)
     cbar.ax.tick_params(labelsize=20)  # Set colorbar tick label size
 
-    axes[0].set_ylabel("$y$", fontsize=24)
-    axes[1].set_xlabel("$x$", fontsize=24)
-    axes[0].set_title("$f$=%1.3f," %f1 + "$k$=%1.3f" %k1, fontsize=24)
-    axes[1].set_title("$f$=%1.3f," %f2 + "$k$=%1.3f" %k2, fontsize=24)
-    axes[2].set_title("$f$=%1.3f," %f3 + "$k$=%1.3f" %k3, fontsize=24)
+    axes[0].set_ylabel("$y$", fontsize=30)
+    axes[1].set_xlabel("$x$", fontsize=30)
+    axes[0].set_title("$f$=%1.3f," %f1 + "$k$=%1.3f" %k1, fontsize=30)
+    axes[1].set_title("$f$=%1.3f," %f2 + "$k$=%1.3f" %k2, fontsize=30)
+    axes[2].set_title("$f$=%1.3f," %f3 + "$k$=%1.3f" %k3, fontsize=30)
 
     for ax in axes:
         ax.tick_params(axis="both", which="major", labelsize=22)
         
-    #fig.suptitle("Concentration of $u$, $t$=%i" %t, fontsize=20)
     
     return fig
 
-def visualise_gray_scott_noise(t):
+def visualise_gray_scott_noise():
     """
     Visualises final concentration of u for three sets of parameters
     when noise is added to the initial state. 
@@ -68,16 +67,15 @@ def visualise_gray_scott_noise(t):
     cbar = fig.colorbar(im0, ax=axes[:], fraction=0.02, pad=0.01)
     cbar.ax.tick_params(labelsize=20)  # Set colorbar tick label size
 
-    axes[0].set_ylabel("$y$", fontsize=24)
-    axes[1].set_xlabel("$x$", fontsize=24)
-    axes[0].set_title("$f$=%1.3f," %f1 + "$k$=%1.3f" %k1, fontsize=24)
-    axes[1].set_title("$f$=%1.3f," %f2 + "$k$=%1.3f" %k2, fontsize=24)
-    axes[2].set_title("$f$=%1.3f," %f3 + "$k$=%1.3f" %k3, fontsize=24)
+    axes[0].set_ylabel("$y$", fontsize=30)
+    axes[1].set_xlabel("$x$", fontsize=30)
+    axes[0].set_title("$f$=%1.3f," %f1 + "$k$=%1.3f" %k1, fontsize=30)
+    axes[1].set_title("$f$=%1.3f," %f2 + "$k$=%1.3f" %k2, fontsize=30)
+    axes[2].set_title("$f$=%1.3f," %f3 + "$k$=%1.3f" %k3, fontsize=30)
 
     for ax in axes:
         ax.tick_params(axis="both", which="major", labelsize=22)
         
-    #fig.suptitle("Concentration of $u$, $t$=%i" %t, fontsize=20)
     
     return fig
 
