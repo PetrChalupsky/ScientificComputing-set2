@@ -1,3 +1,0 @@
-from scientificcomputing_set2.parallel_DLA_Laplace import test_parralelize
-
-test_parralelize()
