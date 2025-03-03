@@ -10,4 +10,4 @@ to create conda environment using python 3.10. Activate the environment and proc
 
 To install poetry follow the instructions at this page: https://python-poetry.org/docs/#installing-with-the-official-installer
 
-All the scripts can be run using ```bash run_analysis.sh```
+All the scripts can be run using ```bash run_analysis_all.sh```. Some runs can be rather long; run ```bash run_analysis_partial.sh``` in case you want to do other things this afternoon.

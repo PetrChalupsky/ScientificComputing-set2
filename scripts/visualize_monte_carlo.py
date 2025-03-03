@@ -83,7 +83,6 @@ def cluster_density_together():
     all_grids = [all_grids_1, all_grids_2, all_grids_3, all_grids_4, all_grids_5]
     plt.figure(figsize=(8, 5))
     for i, all_grids in enumerate(all_grids):
-        print(i)
         cluster_densities = [
             np.sum(grid == 1) / all_grids[0].size for grid in all_grids
         ]
