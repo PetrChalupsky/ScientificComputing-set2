@@ -6,7 +6,8 @@ Student IDs: 15746704, 15719227 and 13392425
 File description:
     Measures number of iterations needed for each omega and eta.
 """
-from scientificcomputing_set2.optimal_omega_DLA_Laplace import search_omega_run_DLA, create_objects
+from scientificcomputing_set2.optimal_omega_DLA_Laplace import search_omega_run_DLA
+from scientificcomputing_set2.DLA_Laplace import create_objects
 import numpy as np
 import multiprocessing as mp
 
